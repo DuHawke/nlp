@@ -3,5 +3,4 @@ uvicorn[standard]>=0.29.0
 transformers>=4.40.0
 torch>=2.2.0
 sentencepiece>=0.2.0
-sacremoses>=0.1.0
 langdetect>=1.0.9

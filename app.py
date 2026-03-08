@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from transformers import MarianMTModel, MarianTokenizer
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 from langdetect import detect, DetectorFactory
 from langdetect.lang_detect_exception import LangDetectException
 import torch
@@ -13,156 +13,144 @@ DetectorFactory.seed = 0
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="MarianMT Translator")
+app = FastAPI(title="NLLB-200 Translator")
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-LANGUAGE_PAIRS = {
-    ("en", "vi"): "Helsinki-NLP/opus-mt-en-vi",
-    ("vi", "en"): "Helsinki-NLP/opus-mt-vi-en",
-    ("en", "fr"): "Helsinki-NLP/opus-mt-en-fr",
-    ("fr", "en"): "Helsinki-NLP/opus-mt-fr-en",
-    ("en", "de"): "Helsinki-NLP/opus-mt-en-de",
-    ("de", "en"): "Helsinki-NLP/opus-mt-de-en",
-    ("en", "es"): "Helsinki-NLP/opus-mt-en-es",
-    ("es", "en"): "Helsinki-NLP/opus-mt-es-en",
-    ("en", "zh"): "Helsinki-NLP/opus-mt-en-zh",
-    ("zh", "en"): "Helsinki-NLP/opus-mt-zh-en",
-    ("en", "ja"): "Helsinki-NLP/opus-mt-en-jap",
-    ("en", "ko"): "Helsinki-NLP/opus-mt-en-ko",
-    ("en", "ru"): "Helsinki-NLP/opus-mt-en-ru",
-    ("ru", "en"): "Helsinki-NLP/opus-mt-ru-en",
-    ("en", "it"): "Helsinki-NLP/opus-mt-en-it",
-    ("it", "en"): "Helsinki-NLP/opus-mt-it-en",
-    ("en", "pt"): "Helsinki-NLP/opus-mt-en-pt",
-    ("pt", "en"): "Helsinki-NLP/opus-mt-pt-en",
-    ("en", "ar"): "Helsinki-NLP/opus-mt-en-ar",
-    ("ar", "en"): "Helsinki-NLP/opus-mt-ar-en",
+LANG_CODES = {
+    "vi": "vie_Latn",
+    "en": "eng_Latn",
+    "zh": "zho_Hans",
+    "ja": "jpn_Jpan",
+    "ko": "kor_Hang",
+    "fr": "fra_Latn",
+    "de": "deu_Latn",
+    "es": "spa_Latn",
+    "ru": "rus_Cyrl",
+    "ar": "arb_Arab",
+    "pt": "por_Latn",
+    "it": "ita_Latn",
+    "th": "tha_Thai",
+    "hi": "hin_Deva",
+    "tr": "tur_Latn",
+    "nl": "nld_Latn",
+    "pl": "pol_Latn",
+    "sv": "swe_Latn",
+    "da": "dan_Latn",
+    "fi": "fin_Latn",
+    "cs": "ces_Latn",
+    "ro": "ron_Latn",
+    "hu": "hun_Latn",
+    "id": "ind_Latn",
+    "ms": "zsm_Latn",
+    "uk": "ukr_Cyrl",
+    "he": "heb_Hebr",
 }
 
+DETECT_MAP = {
+    "zh-cn": "zh", "zh-tw": "zh",
+    "vi": "vi", "en": "en", "ja": "ja", "ko": "ko",
+    "fr": "fr", "de": "de", "es": "es", "ru": "ru",
+    "ar": "ar", "pt": "pt", "it": "it", "th": "th",
+    "hi": "hi", "tr": "tr", "nl": "nl", "pl": "pl",
+    "sv": "sv", "da": "da", "fi": "fi", "cs": "cs",
+    "ro": "ro", "hu": "hu", "id": "id", "ms": "ms",
+    "uk": "uk", "he": "he",
+}
+
+MODEL_NAME = "facebook/nllb-200-distilled-600M"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 logger.info(f"Device: {DEVICE}")
 
-_cache: dict = {} 
+_model = None
+_tokenizer = None
 
 
-def _load_model(src: str, tgt: str):
-    key = (src, tgt)
-    if key in _cache:
-        return _cache[key]
-    model_name = LANGUAGE_PAIRS.get(key)
-    if not model_name:
-        raise HTTPException(400, f"Không có model cho cặp '{src}'→'{tgt}'")
-    logger.info(f"Loading {model_name} ...")
+def load_model():
+    global _model, _tokenizer
+    if _model is not None:
+        return
+    logger.info(f"Loading {MODEL_NAME} ...")
+    _tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+    _model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME).to(DEVICE)
+    _model.eval()
+    logger.info("NLLB-200 loaded ✓")
+
+
+def detect_language(text: str) -> str:
+    if len(text.strip()) < 8:
+        return "en"
     try:
-        tok = MarianTokenizer.from_pretrained(model_name)
-        mdl = MarianMTModel.from_pretrained(model_name).to(DEVICE)
-        mdl.eval()
-        _cache[key] = (mdl, tok)
-        logger.info(f"Loaded ✓  {model_name}")
-        return mdl, tok
-    except Exception as e:
-        raise HTTPException(500, f"Lỗi tải model: {e}")
+        raw = detect(text)
+        mapped = DETECT_MAP.get(raw, raw)
+        return mapped if mapped in LANG_CODES else "en"
+    except LangDetectException:
+        return "en"
 
 
-def _run_model(text: str, src: str, tgt: str) -> str:
-    model, tok = _load_model(src, tgt)
-    inputs = tok(text, return_tensors="pt",
-                 padding=True, truncation=True, max_length=512).to(DEVICE)
+def translate(text: str, src: str, tgt: str) -> str:
+    load_model()
+    src_nllb = LANG_CODES.get(src)
+    tgt_nllb = LANG_CODES.get(tgt)
+    if not src_nllb:
+        raise HTTPException(400, f"Ngôn ngữ nguồn '{src}' không được hỗ trợ")
+    if not tgt_nllb:
+        raise HTTPException(400, f"Ngôn ngữ đích '{tgt}' không được hỗ trợ")
+
+    _tokenizer.src_lang = src_nllb
+    inputs = _tokenizer(
+        text, return_tensors="pt",
+        padding=True, truncation=True, max_length=512,
+    ).to(DEVICE)
+
+    tgt_lang_id = _tokenizer.convert_tokens_to_ids(tgt_nllb)
     with torch.no_grad():
-        out = model.generate(**inputs, max_length=512, num_beams=4, early_stopping=True)
-    return tok.batch_decode(out, skip_special_tokens=True)[0]
-
-
-def translate_with_pivot(text: str, src: str, tgt: str) -> tuple[str, bool]:
-    if src == tgt:
-        return text, False
-
-    if (src, tgt) in LANGUAGE_PAIRS:
-        return _run_model(text, src, tgt), False
-
-    pivot_ok = (src, "en") in LANGUAGE_PAIRS and ("en", tgt) in LANGUAGE_PAIRS
-    if pivot_ok:
-        logger.info(f"Pivot: {src}→en→{tgt}")
-        en_text = _run_model(text, src, "en")
-        result  = _run_model(en_text, "en", tgt)
-        return result, True
-
-    supported = ", ".join(f"{s}→{t}" for s, t in LANGUAGE_PAIRS)
-    raise HTTPException(400, f"Không hỗ trợ '{src}'→'{tgt}' (kể cả qua pivot). Hỗ trợ: {supported}")
+        output_ids = _model.generate(
+            **inputs,
+            forced_bos_token_id=tgt_lang_id,
+            max_length=512,
+            num_beams=5,
+            length_penalty=1.0,
+            no_repeat_ngram_size=3,
+            early_stopping=True,
+        )
+    return _tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0]
 
 
 class TranslateRequest(BaseModel):
     text: str
-    src_lang: str
+    src_lang: str   # "auto" hoặc mã ngôn ngữ
     tgt_lang: str
-
-LANG_MAP = {
-    "zh-cn": "zh", "zh-tw": "zh",
-    "ja": "ja", "ko": "ko",
-    "vi": "vi", "en": "en",
-    "fr": "fr", "de": "de",
-    "es": "es", "it": "it",
-    "pt": "pt", "ru": "ru",
-    "ar": "ar",
-}
-SUPPORTED_DETECT = set(LANG_MAP.values())
-
-
-def detect_language(text: str) -> str:
-    if len(text.strip()) < 10:
-        return "en"
-    try:
-        raw = detect(text)
-        mapped = LANG_MAP.get(raw, raw)
-        all_langs = set(l for pair in LANGUAGE_PAIRS for l in pair)
-        return mapped if mapped in all_langs else "en"
-    except LangDetectException:
-        return "en"
-
 
 @app.get("/api/health")
 def health():
     return {
         "status": "ok",
+        "model": MODEL_NAME,
         "device": DEVICE,
-        "cached": [f"{s}→{t}" for s, t in _cache],
+        "loaded": _model is not None,
     }
 
 
-@app.get("/api/pairs")
-def pairs():
-    direct = set(LANGUAGE_PAIRS.keys())
-    all_langs = set(l for pair in LANGUAGE_PAIRS for l in pair)
-    result = []
-    for s in all_langs:
-        for t in all_langs:
-            if s == t:
-                continue
-            if (s, t) in direct:
-                result.append({"src": s, "tgt": t, "pivot": False})
-            elif (s, "en") in direct and ("en", t) in direct:
-                result.append({"src": s, "tgt": t, "pivot": True})
-    return result
+@app.get("/api/langs")
+def langs():
+    return [{"code": k, "nllb": v} for k, v in LANG_CODES.items()]
 
 
 @app.post("/api/translate")
-def translate(req: TranslateRequest):
+def api_translate(req: TranslateRequest):
     if not req.text.strip():
         raise HTTPException(400, "Văn bản trống")
 
     src = detect_language(req.text.strip()) if req.src_lang == "auto" else req.src_lang
 
     if src == req.tgt_lang:
-        return {"translated": req.text, "pivot": False, "detected_src": src}
+        return {"translated": req.text, "detected_src": src}
 
-    result, is_pivot = translate_with_pivot(req.text.strip(), src, req.tgt_lang)
-    return {"translated": result, "pivot": is_pivot, "detected_src": src}
+    if req.tgt_lang not in LANG_CODES:
+        raise HTTPException(400, f"Ngôn ngữ đích '{req.tgt_lang}' không hỗ trợ")
+
+    result = translate(req.text.strip(), src, req.tgt_lang)
+    return {"translated": result, "detected_src": src}
 
 
 if os.path.exists("index.html"):

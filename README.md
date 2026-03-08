@@ -7,6 +7,7 @@ source .env/bin/activate          # Linux(bash/zsh)/MacOS
 
 ### Install
 ```bibtex
+pip install fastapi uvicorn transformers torch sentencepiece langdetect
 pip install -r requirements.txt
 ```
 
