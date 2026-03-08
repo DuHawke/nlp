@@ -2,7 +2,7 @@
 ```bibtex
 python -m venv .env
 source .env/bin/activate          # Linux(bash/zsh)/MacOS
-C:\> .env\Scripts\activate.bat  # Windows(cmd.exe) 
+.env\Scripts\activate.bat  # Windows(cmd.exe) 
 ```
 
 ### Install
