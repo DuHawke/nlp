@@ -1,3 +1,10 @@
+### Create venv
+```bibtex
+python -m venv .env
+source .env/bin/activate          # Linux(bash/zsh)/MacOS
+C:\> <venv>\Scripts\activate.bat  # Windows(cmd.exe) 
+```
+
 ### Install
 ```bibtex
 pip install -r requirements.txt
