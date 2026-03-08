@@ -4,10 +4,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MarianMT · Neural Translator</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <title>Multilingual-NLP</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=DM+Mono:wght@300;400;500&display=swap"
         rel="stylesheet" />
     <style>
         *,
@@ -27,7 +26,6 @@
             --jade-dim: rgba(45, 212, 160, 0.12);
             --jade-glow: rgba(45, 212, 160, 0.25);
             --gold: #f0c060;
-            --gold-dim: rgba(240, 192, 96, 0.1);
             --sky: #60b8f0;
             --border: rgba(45, 212, 160, 0.15);
             --border2: rgba(255, 255, 255, 0.06);
@@ -36,11 +34,7 @@
             --text3: #3a5a52;
             --red: #f06060;
             --serif: 'Playfair Display', Georgia, serif;
-            --mono: 'DM Mono', 'Courier New', monospace;
-        }
-
-        html {
-            scroll-behavior: smooth;
+            --mono: 'DM Mono', monospace;
         }
 
         body {
@@ -49,10 +43,8 @@
             font-family: var(--mono);
             min-height: 100vh;
             overflow-x: hidden;
-            cursor: default;
         }
 
-        /* ── Animated background ── */
         .bg-layer {
             position: fixed;
             inset: 0;
@@ -65,8 +57,7 @@
             inset: 0;
             background:
                 radial-gradient(ellipse 60% 50% at 10% 20%, rgba(45, 212, 160, 0.06) 0%, transparent 60%),
-                radial-gradient(ellipse 50% 60% at 90% 80%, rgba(96, 184, 240, 0.05) 0%, transparent 60%),
-                radial-gradient(ellipse 40% 30% at 50% 50%, rgba(240, 192, 96, 0.03) 0%, transparent 70%);
+                radial-gradient(ellipse 50% 60% at 90% 80%, rgba(96, 184, 240, 0.05) 0%, transparent 60%);
         }
 
         .bg-grid {
@@ -92,7 +83,6 @@
             top: -150px;
             left: -100px;
             background: rgba(45, 212, 160, 0.04);
-            animation-delay: 0s;
         }
 
         .orb2 {
@@ -104,15 +94,6 @@
             animation-delay: -5s;
         }
 
-        .orb3 {
-            width: 300px;
-            height: 300px;
-            top: 40%;
-            left: 60%;
-            background: rgba(240, 192, 96, 0.03);
-            animation-delay: -8s;
-        }
-
         @keyframes orbFloat {
 
             0%,
@@ -120,16 +101,11 @@
                 transform: translate(0, 0) scale(1);
             }
 
-            33% {
-                transform: translate(30px, -40px) scale(1.05);
-            }
-
-            66% {
-                transform: translate(-20px, 25px) scale(0.97);
+            50% {
+                transform: translate(20px, -30px) scale(1.04);
             }
         }
 
-        /* ── Layout ── */
         .wrap {
             position: relative;
             z-index: 1;
@@ -138,124 +114,140 @@
             padding: 56px 28px 80px;
         }
 
-        /* ── Header ── */
         header {
-            margin-bottom: 52px;
-            animation: fadeUp 0.8s ease both;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 5px 14px;
-            border-radius: 20px;
-            margin-bottom: 24px;
-            background: var(--jade-dim);
-            border: 1px solid var(--border);
-            font-size: 10px;
-            letter-spacing: 0.3em;
-            text-transform: uppercase;
-            color: var(--jade);
-        }
-
-        .badge-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--jade);
-            animation: pulse 2s infinite;
+            margin-bottom: 44px;
+            animation: fadeUp 0.7s ease both;
         }
 
         h1 {
             font-family: var(--serif);
-            font-size: clamp(52px, 8vw, 96px);
+            font-size: clamp(48px, 7vw, 88px);
             font-weight: 400;
-            line-height: 0.95;
+            line-height: 1;
             letter-spacing: -0.03em;
             color: #e8f4f0;
-            margin-bottom: 16px;
+            white-space: nowrap;
         }
 
-        h1 span {
-            display: block;
-        }
-
-        h1 .highlight {
+        h1 .hl {
             font-style: italic;
             color: var(--jade);
         }
 
-        .sub {
-            font-size: 11px;
-            letter-spacing: 0.2em;
-            color: var(--text3);
-            text-transform: uppercase;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .sub::before {
-            content: '';
-            width: 32px;
-            height: 1px;
-            background: var(--jade);
-            opacity: 0.4;
-        }
-
-        /* ── Language selector ── */
         .lang-section {
-            margin-bottom: 20px;
-            animation: fadeUp 0.8s ease 0.1s both;
+            margin-bottom: 16px;
+            animation: fadeUp 0.7s ease 0.08s both;
         }
 
         .lang-card {
             display: flex;
             align-items: center;
-            gap: 0;
             background: var(--bg2);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: visible;
-            position: relative;
             box-shadow: 0 4px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(45, 212, 160, 0.08);
         }
 
-        .lang-half {
+        .detect-side {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            min-width: 0;
+        }
+
+        .detect-spin {
+            font-size: 16px;
+            color: var(--jade);
+            opacity: 0.7;
+            flex-shrink: 0;
+            animation: spin 4s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .detect-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .detect-label {
+            font-size: 9px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--jade);
+            opacity: 0.7;
+            margin-bottom: 2px;
+        }
+
+        .detect-name {
+            font-size: 13px;
+            color: var(--text2);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .detect-flag {
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .sep {
+            width: 1px;
+            height: 36px;
+            background: var(--border);
+            flex-shrink: 0;
+        }
+
+        .arrow-icon {
+            padding: 0 10px;
+            font-size: 14px;
+            color: var(--text3);
+            flex-shrink: 0;
+        }
+
+        .tgt-side {
             flex: 1;
             position: relative;
         }
 
-        .lang-button {
+        .tgt-btn {
             width: 100%;
             background: none;
             border: none;
             cursor: pointer;
             font-family: var(--mono);
             color: var(--text);
-            padding: 18px 22px;
+            padding: 16px 20px;
             display: flex;
             align-items: center;
             gap: 12px;
             transition: background 0.2s;
+            border-radius: 0 10px 10px 0;
         }
 
-        .lang-button:hover {
+        .tgt-btn:hover {
             background: rgba(45, 212, 160, 0.05);
         }
 
-        .lang-flag {
-            font-size: 24px;
-            line-height: 1;
+        .tgt-flag {
+            font-size: 22px;
             flex-shrink: 0;
         }
 
-        .lang-info {
+        .tgt-info {
+            flex: 1;
             text-align: left;
         }
 
-        .lang-code {
+        .tgt-code {
             font-size: 9px;
             letter-spacing: 0.3em;
             text-transform: uppercase;
@@ -263,85 +255,36 @@
             margin-bottom: 2px;
         }
 
-        .lang-name {
+        .tgt-name {
             font-size: 13px;
-            color: var(--text);
-            letter-spacing: 0.02em;
         }
 
-        .lang-arrow {
-            margin-left: auto;
+        .tgt-arrow {
             font-size: 9px;
             color: var(--text3);
+            flex-shrink: 0;
             transition: transform 0.2s;
         }
 
-        .lang-half.open .lang-arrow {
+        .tgt-side.open .tgt-arrow {
             transform: rotate(180deg);
         }
 
-        .lang-sep {
-            width: 1px;
-            height: 40px;
-            background: var(--border);
-            flex-shrink: 0;
-        }
-
-        /* ── Detect half (auto src) ── */
-        .detect-half {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 18px 22px;
-            color: var(--text2);
-        }
-
-        .detect-icon {
-            font-size: 18px;
-            color: var(--jade);
-            opacity: 0.7;
-            animation: spin-slow 4s linear infinite;
-            flex-shrink: 0;
-        }
-
-        @keyframes spin-slow {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .detect-half .lang-code {
-            color: var(--jade);
-            opacity: 0.7;
-        }
-
-        .detect-half .lang-name {
-            font-size: 13px;
-            color: var(--text2);
-        }
-
-        .detect-flag {
-            font-size: 22px;
-            margin-left: auto;
-            min-width: 28px;
-            text-align: right;
-        }
-
-        .arrow-mid {
-            padding: 0 6px;
-            font-size: 16px;
-            color: var(--text3);
-            flex-shrink: 0;
-        }
-
-        /* ── Global floating popup ── */
-        #langPopup {
+        .pivot-badge {
             display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 6px;
+            margin-bottom: 14px;
+            background: rgba(240, 192, 96, 0.08);
+            border: 1px solid rgba(240, 192, 96, 0.2);
+            font-size: 11px;
+            color: var(--gold);
+            letter-spacing: 0.05em;
+        }
+
+        #langPopup {
             position: fixed;
             z-index: 99999;
             width: 270px;
@@ -349,27 +292,22 @@
             border: 1px solid rgba(45, 212, 160, 0.4);
             border-radius: 14px;
             overflow: hidden;
-            box-shadow:
-                0 0 0 1px rgba(45, 212, 160, 0.08),
-                0 8px 20px rgba(0, 0, 0, 0.5),
-                0 32px 80px rgba(0, 0, 0, 0.7),
-                0 0 60px rgba(45, 212, 160, 0.1);
+            box-shadow: 0 0 0 1px rgba(45, 212, 160, 0.08), 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 60px rgba(45, 212, 160, 0.1);
             max-height: min(400px, calc(100vh - 100px));
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            transform-origin: top left;
+            backdrop-filter: blur(20px);
             flex-direction: column;
+            display: none;
         }
 
-        #langPopup.visible {
+        #langPopup.open {
             display: flex;
-            animation: popIn 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation: popIn 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
 
         @keyframes popIn {
             from {
                 opacity: 0;
-                transform: scale(0.94) translateY(-8px);
+                transform: scale(0.95) translateY(-6px);
             }
 
             to {
@@ -378,41 +316,40 @@
             }
         }
 
-        .popup-header {
-            padding: 11px 18px 9px;
+        .popup-hd {
+            padding: 10px 16px 8px;
+            flex-shrink: 0;
             font-size: 9px;
             letter-spacing: 0.4em;
             text-transform: uppercase;
             color: var(--jade);
             border-bottom: 1px solid rgba(45, 212, 160, 0.12);
-            background: rgba(45, 212, 160, 0.06);
+            background: rgba(45, 212, 160, 0.05);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 7px;
         }
 
-        .popup-header::before {
+        .popup-hd::before {
             content: '';
             width: 5px;
             height: 5px;
             border-radius: 50%;
             background: var(--jade);
             box-shadow: 0 0 8px var(--jade);
-            flex-shrink: 0;
         }
 
         .popup-list {
             overflow-y: auto;
             flex: 1;
             overscroll-behavior: contain;
-            -webkit-overflow-scrolling: touch;
         }
 
         .lang-opt {
             display: flex;
             align-items: center;
-            gap: 14px;
-            padding: 12px 18px;
+            gap: 12px;
+            padding: 11px 16px;
             cursor: pointer;
             font-family: var(--mono);
             font-size: 13px;
@@ -422,7 +359,7 @@
             width: 100%;
             text-align: left;
             border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-            transition: background 0.12s, padding-left 0.12s, color 0.12s;
+            transition: background 0.12s, color 0.12s, padding-left 0.12s;
         }
 
         .lang-opt:last-child {
@@ -432,52 +369,34 @@
         .lang-opt:hover {
             background: rgba(45, 212, 160, 0.09);
             color: var(--text);
-            padding-left: 24px;
+            padding-left: 22px;
         }
 
-        .lang-opt.active {
+        .lang-opt.sel {
             color: var(--jade);
             background: rgba(45, 212, 160, 0.08);
         }
 
-        .lang-opt.active::after {
+        .lang-opt.sel::after {
             content: '✓';
             margin-left: auto;
             font-size: 11px;
-            opacity: 0.8;
         }
 
-        .lang-opt .flag {
-            font-size: 22px;
-            line-height: 1;
+        .lang-opt .fl {
+            font-size: 20px;
             flex-shrink: 0;
         }
 
-        /* ── Pivot badge ── */
-        .pivot-badge {
-            padding: 8px 14px;
-            border-radius: 6px;
-            margin-bottom: 14px;
-            background: rgba(240, 192, 96, 0.08);
-            border: 1px solid rgba(240, 192, 96, 0.2);
-            font-size: 11px;
-            color: var(--gold);
-            letter-spacing: 0.06em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* ── Editor ── */
         .editor-wrap {
-            margin-bottom: 16px;
-            animation: fadeUp 0.8s ease 0.2s both;
+            margin-bottom: 14px;
+            animation: fadeUp 0.7s ease 0.16s both;
         }
 
         .panels {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 14px;
+            gap: 12px;
         }
 
         .panel {
@@ -487,13 +406,13 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            transition: border-color 0.3s;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+            transition: border-color 0.25s;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);
         }
 
         .panel:focus-within {
-            border-color: rgba(45, 212, 160, 0.3);
-            box-shadow: 0 0 0 3px rgba(45, 212, 160, 0.06), 0 2px 20px rgba(0, 0, 0, 0.2);
+            border-color: rgba(45, 212, 160, 0.28);
+            box-shadow: 0 0 0 3px rgba(45, 212, 160, 0.05), 0 2px 16px rgba(0, 0, 0, 0.2);
         }
 
         .panel-out {
@@ -501,33 +420,34 @@
             border-color: rgba(45, 212, 160, 0.1);
         }
 
-        .panel-head {
+        .p-head {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 18px;
+            padding: 11px 16px;
             border-bottom: 1px solid var(--border2);
-            background: rgba(0, 0, 0, 0.15);
+            background: rgba(0, 0, 0, 0.12);
+            flex-shrink: 0;
         }
 
-        .panel-tag {
+        .p-tag {
             font-size: 9px;
             letter-spacing: 0.3em;
             text-transform: uppercase;
             color: var(--text3);
             display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 6px;
         }
 
-        .panel-tag .dot-tag {
+        .p-dot {
             width: 5px;
             height: 5px;
             border-radius: 50%;
             background: var(--text3);
         }
 
-        .panel-out .panel-tag .dot-tag {
+        .panel-out .p-dot {
             background: var(--jade);
             box-shadow: 0 0 6px var(--jade);
         }
@@ -535,7 +455,6 @@
         .char-ct {
             font-size: 10px;
             color: var(--text3);
-            font-variant-numeric: tabular-nums;
         }
 
         .char-ct.warn {
@@ -548,11 +467,11 @@
             border: none;
             outline: none;
             resize: none;
-            font-family: 'Playfair Display', serif;
+            font-family: var(--serif);
             font-size: 17px;
             line-height: 1.8;
             color: var(--text);
-            padding: 20px 20px 16px;
+            padding: 18px 18px 14px;
             min-height: 220px;
             caret-color: var(--jade);
         }
@@ -564,8 +483,8 @@
 
         .out-body {
             flex: 1;
-            padding: 20px 20px 16px;
-            font-family: 'Playfair Display', serif;
+            padding: 18px 18px 14px;
+            font-family: var(--serif);
             font-size: 17px;
             line-height: 1.8;
             color: var(--text);
@@ -574,13 +493,12 @@
             overflow-y: auto;
         }
 
-        .out-placeholder {
+        .out-ph {
             color: var(--text3);
             font-style: italic;
         }
 
-        /* Typing animation */
-        @keyframes cursor-blink {
+        @keyframes blink {
 
             0%,
             100% {
@@ -595,50 +513,47 @@
         .typing::after {
             content: '|';
             color: var(--jade);
-            animation: cursor-blink 0.8s infinite;
+            animation: blink 0.8s infinite;
             margin-left: 2px;
-            font-style: normal;
         }
 
-        /* Progress */
         .prog-wrap {
             height: 3px;
             background: rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+            display: none;
         }
 
         .prog-bar {
             height: 100%;
             width: 0;
             background: linear-gradient(90deg, var(--jade), var(--sky));
-            border-radius: 0 2px 2px 0;
-            transition: width 0.4s;
         }
 
-        .prog-bar.running {
+        .prog-bar.run {
             width: 45% !important;
-            animation: prog-slide 1.4s ease-in-out infinite;
+            animation: pslide 1.3s ease-in-out infinite;
         }
 
-        @keyframes prog-slide {
+        @keyframes pslide {
             0% {
-                transform: translateX(-200%);
+                transform: translateX(-200%)
             }
 
             100% {
-                transform: translateX(320%);
+                transform: translateX(320%)
             }
         }
 
-        /* ── Bottom actions ── */
         .actions {
             display: flex;
             gap: 10px;
-            animation: fadeUp 0.8s ease 0.3s both;
+            animation: fadeUp 0.7s ease 0.24s both;
         }
 
-        .btn-main {
+        .btn-go {
             flex: 1;
-            padding: 16px 28px;
+            padding: 15px 28px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -647,45 +562,26 @@
             font-weight: 500;
             letter-spacing: 0.18em;
             text-transform: uppercase;
-            transition: all 0.25s;
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(135deg, var(--jade) 0%, #1ab88a 100%);
+            transition: all 0.22s;
+            background: linear-gradient(135deg, var(--jade), #1ab88a);
             color: #061410;
             box-shadow: 0 4px 20px rgba(45, 212, 160, 0.3);
         }
 
-        .btn-main::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent);
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        .btn-main:hover:not(:disabled)::before {
-            opacity: 1;
-        }
-
-        .btn-main:hover:not(:disabled) {
+        .btn-go:hover:not(:disabled) {
             transform: translateY(-1px);
             box-shadow: 0 6px 28px rgba(45, 212, 160, 0.4);
         }
 
-        .btn-main:active:not(:disabled) {
-            transform: translateY(0);
-        }
-
-        .btn-main:disabled {
+        .btn-go:disabled {
             background: var(--bg3);
             color: var(--text3);
             box-shadow: none;
             cursor: not-allowed;
         }
 
-        .btn-copy {
-            padding: 16px 20px;
+        .btn-cp {
+            padding: 15px 18px;
             background: var(--bg2);
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -693,33 +589,31 @@
             cursor: pointer;
             font-family: var(--mono);
             font-size: 11px;
-            letter-spacing: 0.12em;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
-            transition: all 0.25s;
+            transition: all 0.22s;
             white-space: nowrap;
         }
 
-        .btn-copy:hover:not(:disabled) {
-            border-color: var(--jade);
-            color: var(--jade);
-            background: var(--jade-dim);
-        }
-
-        .btn-copy.done {
+        .btn-cp:hover:not(:disabled) {
             border-color: var(--jade);
             color: var(--jade);
         }
 
-        .btn-copy:disabled {
+        .btn-cp.done {
+            border-color: var(--jade);
+            color: var(--jade);
+        }
+
+        .btn-cp:disabled {
             opacity: 0.3;
             cursor: not-allowed;
         }
 
-        /* ── Error ── */
-        .error-box {
+        .err-box {
             display: none;
             margin-bottom: 12px;
-            padding: 12px 16px;
+            padding: 11px 16px;
             background: rgba(240, 96, 96, 0.07);
             border: 1px solid rgba(240, 96, 96, 0.2);
             border-radius: 6px;
@@ -728,31 +622,29 @@
             line-height: 1.6;
         }
 
-        .error-box.show {
+        .err-box.show {
             display: block;
         }
 
-        /* ── Footer ── */
         footer {
-            margin-top: 40px;
-            padding-top: 24px;
+            margin-top: 36px;
+            padding-top: 22px;
             border-top: 1px solid var(--border2);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            animation: fadeUp 0.8s ease 0.4s both;
+            animation: fadeUp 0.7s ease 0.32s both;
         }
 
-        .status {
+        .ft-status {
             font-size: 11px;
             color: var(--text3);
-            letter-spacing: 0.05em;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .status-dot {
+        .ft-dot {
             width: 6px;
             height: 6px;
             border-radius: 50%;
@@ -761,47 +653,27 @@
             animation: pulse 2s infinite;
         }
 
-        .device-pill {
+        .ft-device {
             display: flex;
             align-items: center;
             gap: 8px;
             background: var(--bg2);
             border: 1px solid var(--border);
-            padding: 6px 14px;
+            padding: 5px 12px;
             border-radius: 20px;
             font-size: 10px;
             color: var(--text2);
-            letter-spacing: 0.1em;
         }
 
-        .device-icon {
-            font-size: 13px;
-        }
-
-        /* ── Scrollbar ── */
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(45, 212, 160, 0.2);
-            border-radius: 2px;
-        }
-
-        /* ── Utilities ── */
         @keyframes fadeUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(18px)
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0)
             }
         }
 
@@ -817,17 +689,22 @@
             }
         }
 
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(45, 212, 160, 0.2);
+            border-radius: 2px;
+        }
+
         @media (max-width: 680px) {
             .panels {
                 grid-template-columns: 1fr;
             }
 
             h1 {
-                font-size: 52px;
-            }
-
-            .lang-card {
-                flex-wrap: wrap;
+                font-size: 44px;
             }
         }
     </style>
@@ -840,66 +717,57 @@
         <div class="bg-grid"></div>
         <div class="bg-orb orb1"></div>
         <div class="bg-orb orb2"></div>
-        <div class="bg-orb orb3"></div>
     </div>
 
     <div class="wrap">
 
-        <!-- Header -->
         <header>
-            <h1><span class="highlight">Multilingual-NLP</span></h1>
+            <h1>Multilingual-<span class="hl">NLP</span></h1>
         </header>
 
-        <!-- Language selector -->
         <div class="lang-section">
             <div class="lang-card">
-                <!-- Auto detect display -->
-                <div class="detect-half">
-                    <div class="detect-icon">⟳</div>
-                    <div class="lang-info">
-                        <div class="lang-code">Tự động</div>
-                        <div class="lang-name" id="detectedName">Đang chờ văn bản…</div>
+
+                <div class="detect-side">
+                    <div class="detect-spin">⟳</div>
+                    <div class="detect-info">
+                        <div class="detect-label">Tự động nhận diện</div>
+                        <div class="detect-name" id="detectedName">Đang chờ văn bản…</div>
                     </div>
-                    <span class="detect-flag" id="detectedFlag"></span>
+                    <div class="detect-flag" id="detectedFlag"></div>
                 </div>
 
-                <div class="lang-sep"></div>
-                <div class="arrow-mid">→</div>
-                <div class="lang-sep"></div>
+                <div class="sep"></div>
+                <div class="arrow-icon">→</div>
+                <div class="sep"></div>
 
-                <!-- Target -->
-                <div class="lang-half" id="tgtHalf">
-                    <button class="lang-button" onclick="toggleDD('tgt')">
-                        <span class="lang-flag" id="tgtFlag">🇬🇧</span>
-                        <div class="lang-info">
-                            <div class="lang-code" id="tgtCode">EN</div>
-                            <div class="lang-name" id="tgtName">English</div>
+                <div class="tgt-side" id="tgtSide">
+                    <button class="tgt-btn" onclick="togglePopup()">
+                        <span class="tgt-flag" id="tgtFlag">🇬🇧</span>
+                        <div class="tgt-info">
+                            <div class="tgt-code" id="tgtCode">EN</div>
+                            <div class="tgt-name" id="tgtName">English</div>
                         </div>
-                        <span class="lang-arrow" id="tgtArrow">▾</span>
+                        <span class="tgt-arrow">▾</span>
                     </button>
                 </div>
+
             </div>
         </div>
 
-        <!-- Global language popup -->
         <div id="langPopup">
-            <div class="popup-header" id="popupTitle">Chọn ngôn ngữ</div>
+            <div class="popup-hd">Ngôn ngữ đích</div>
             <div class="popup-list" id="popupList"></div>
         </div>
 
-        <!-- Pivot badge -->
-        <div class="pivot-badge" id="pivotBadge" style="display:none">
-            ⇢ Dịch qua tiếng Anh (pivot)
-        </div>
+        <div class="pivot-badge" id="pivotBadge"></div>
 
-        <!-- Editor -->
         <div class="editor-wrap">
             <div class="panels">
-                <!-- Input -->
                 <div class="panel">
-                    <div class="panel-head">
-                        <span class="panel-tag">
-                            <div class="dot-tag"></div>Văn bản gốc
+                    <div class="p-head">
+                        <span class="p-tag">
+                            <div class="p-dot"></div>Văn bản gốc
                         </span>
                         <span class="char-ct" id="charCt">0 / 2000</span>
                     </div>
@@ -907,43 +775,39 @@
                         maxlength="2000" oninput="onInput()" onkeydown="onKey(event)"></textarea>
                 </div>
 
-                <!-- Output -->
                 <div class="panel panel-out">
-                    <div class="panel-head">
-                        <span class="panel-tag">
-                            <div class="dot-tag"></div>Bản dịch
+                    <div class="p-head">
+                        <span class="p-tag">
+                            <div class="p-dot"></div>Bản dịch
                         </span>
                     </div>
                     <div class="out-body" id="outBody">
-                        <span class="out-placeholder">Bản dịch sẽ xuất hiện ở đây…</span>
+                        <span class="out-ph">Bản dịch sẽ xuất hiện ở đây…</span>
                     </div>
-                    <div class="prog-wrap" id="progWrap" style="display:none">
+                    <div class="prog-wrap" id="progWrap">
                         <div class="prog-bar" id="progBar"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Error -->
-        <div class="error-box" id="errBox"></div>
+        <div class="err-box" id="errBox"></div>
 
-        <!-- Actions -->
         <div class="actions">
-            <button class="btn-main" id="btnTranslate" onclick="doTranslate()" disabled>
-                ✦ &nbsp; Dịch &nbsp; · &nbsp; Ctrl+Enter
+            <button class="btn-go" id="btnGo" onclick="doTranslate()" disabled>
+                ✦ &nbsp; Dịch &nbsp;·&nbsp; Ctrl+Enter
             </button>
-            <button class="btn-copy" id="btnCopy" onclick="doCopy()" disabled>Sao chép</button>
+            <button class="btn-cp" id="btnCp" onclick="doCopy()" disabled>Sao chép</button>
         </div>
 
-        <!-- Footer -->
         <footer>
-            <div class="status">
-                <div class="status-dot" id="statusDot"></div>
-                <span id="statusMsg">Đang kết nối…</span>
+            <div class="ft-status">
+                <div class="ft-dot" id="ftDot"></div>
+                <span id="ftMsg">Đang kết nối…</span>
             </div>
-            <div class="device-pill">
-                <span class="device-icon" id="deviceIcon">⚙</span>
-                <span id="deviceLabel">…</span>
+            <div class="ft-device">
+                <span id="devIcon">⚙</span>
+                <span id="devLabel">…</span>
             </div>
         </footer>
 
@@ -968,110 +832,78 @@
         ];
 
         let tgt = 'en';
-        let supportedPairs = [];
         let busy = false;
         let outputText = '';
-        let detectedSrc = null;
 
-        /* ── Init ─────────────────────────────────────────────────────────────────── */
         async function init() {
-            updateLangUI();
+            updateTgtUI();
             try {
-                const [h, p] = await Promise.all([
-                    fetch(`${API}/health`).then(r => r.json()),
-                    fetch(`${API}/pairs`).then(r => r.json()),
-                ]);
-                supportedPairs = p;
-                const device = h.device.toUpperCase();
-                document.getElementById('deviceLabel').textContent = device;
-                document.getElementById('deviceIcon').textContent = device === 'CUDA' ? '⚡' : '🖥';
+                const res = await fetch(`${API}/health`);
+                const h = await res.json();
+                const dev = h.device.toUpperCase();
+                document.getElementById('devLabel').textContent = dev;
+                document.getElementById('devIcon').textContent = dev === 'CUDA' ? '⚡' : '🖥';
                 setStatus('Sẵn sàng', true);
-                checkPair();
             } catch {
                 setStatus('⚠ Server chưa chạy · uvicorn app:app --port 8000', false);
-                document.getElementById('deviceLabel').textContent = 'offline';
-                document.getElementById('deviceIcon').textContent = '✕';
+                document.getElementById('devLabel').textContent = 'offline';
+                document.getElementById('devIcon').textContent = '✕';
             }
         }
 
-        /* ── Dropdown (target only) ──────────────────────────────────────────────── */
-        let activePopupSide = null;
-
         function buildPopupList() {
-            const list = document.getElementById('popupList');
-            list.innerHTML = LANGS.map(l => `
-    <button class="lang-opt ${l.code === tgt ? 'active' : ''}"
-      onclick="setLang('${l.code}')">
-      <span class="flag">${l.flag}</span>
-      <span>${l.name}</span>
+            document.getElementById('popupList').innerHTML = LANGS.map(l => `
+    <button class="lang-opt ${l.code === tgt ? 'sel' : ''}" onclick="setTgt('${l.code}')">
+      <span class="fl">${l.flag}</span><span>${l.name}</span>
     </button>`).join('');
         }
 
-        function toggleDD() {
+        function togglePopup() {
             const popup = document.getElementById('langPopup');
-            if (activePopupSide === 'tgt' && popup.classList.contains('visible')) {
-                closePopup(); return;
-            }
-            const anchor = document.getElementById('tgtHalf');
-            const rect = anchor.getBoundingClientRect();
-            const popupW = 270;
+            if (popup.classList.contains('open')) { closePopup(); return; }
+
+            const rect = document.getElementById('tgtSide').getBoundingClientRect();
             let left = rect.left;
-            if (left + popupW > window.innerWidth - 12) left = window.innerWidth - popupW - 12;
+            if (left + 270 > window.innerWidth - 12) left = window.innerWidth - 282;
             popup.style.top = (rect.bottom + 8) + 'px';
             popup.style.left = left + 'px';
-            document.getElementById('popupTitle').textContent = 'Ngôn ngữ đích';
-            activePopupSide = 'tgt';
+
             buildPopupList();
-            popup.classList.remove('visible');
-            requestAnimationFrame(() => popup.classList.add('visible'));
+            popup.classList.remove('open');
+            requestAnimationFrame(() => popup.classList.add('open'));
+            document.getElementById('tgtSide').classList.add('open');
         }
 
         function closePopup() {
-            document.getElementById('langPopup').classList.remove('visible');
-            activePopupSide = null;
+            document.getElementById('langPopup').classList.remove('open');
+            document.getElementById('tgtSide').classList.remove('open');
         }
 
-        function setLang(code) {
+        function setTgt(code) {
             tgt = code;
             closePopup();
-            updateLangUI(); checkPair();
+            updateTgtUI();
         }
 
-        function updateLangUI() {
-            const t = LANGS.find(l => l.code === tgt);
-            document.getElementById('tgtFlag').textContent = t.flag;
-            document.getElementById('tgtCode').textContent = t.code.toUpperCase();
-            document.getElementById('tgtName').textContent = t.name;
+        function updateTgtUI() {
+            const l = LANGS.find(l => l.code === tgt);
+            document.getElementById('tgtFlag').textContent = l.flag;
+            document.getElementById('tgtCode').textContent = l.code.toUpperCase();
+            document.getElementById('tgtName').textContent = l.name;
         }
 
-        function updateDetectedUI(code) {
-            const lang = LANGS.find(l => l.code === code);
-            if (lang) {
-                document.getElementById('detectedFlag').textContent = lang.flag;
-                document.getElementById('detectedName').textContent = lang.name;
-            }
-        }
-
-        function checkPair() {
-            const hasText = !!document.getElementById('inputText').value.trim();
-            document.getElementById('btnTranslate').disabled = !hasText || busy;
-            document.getElementById('pivotBadge').style.display = 'none';
-        }
-
-        /* ── Input ───────────────────────────────────────────────────────────────── */
         function onInput() {
             const v = document.getElementById('inputText').value;
-            const cc = document.getElementById('charCt');
-            cc.textContent = `${v.length} / 2000`;
-            cc.className = 'char-ct' + (v.length > 1800 ? ' warn' : '');
-            checkPair();
+            const el = document.getElementById('charCt');
+            el.textContent = `${v.length} / 2000`;
+            el.className = 'char-ct' + (v.length > 1800 ? ' warn' : '');
+            document.getElementById('btnGo').disabled = !v.trim() || busy;
         }
 
         function onKey(e) {
             if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); doTranslate(); }
         }
 
-        /* ── Translate ───────────────────────────────────────────────────────────── */
         async function doTranslate() {
             const text = document.getElementById('inputText').value.trim();
             if (!text || busy) return;
@@ -1080,7 +912,6 @@
             setLoading(true);
             setStatus('Đang dịch…', true);
 
-            // Show typing effect on output
             const outEl = document.getElementById('outBody');
             outEl.textContent = '';
             outEl.classList.add('typing');
@@ -1093,83 +924,69 @@
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.detail || 'Lỗi server');
+
                 outEl.classList.remove('typing');
                 outputText = data.translated;
-                detectedSrc = data.detected_src;
-                showOutput(outputText);
-                updateDetectedUI(detectedSrc);
-                const srcLabel = LANGS.find(l => l.code === detectedSrc)?.name || detectedSrc?.toUpperCase();
-                const tgtLabel = LANGS.find(l => l.code === tgt)?.name || tgt.toUpperCase();
-                const route = data.pivot
-                    ? `${srcLabel} → EN → ${tgtLabel}`
-                    : `${srcLabel} → ${tgtLabel}`;
-                document.getElementById('pivotBadge').style.display = data.pivot ? 'flex' : 'none';
-                if (data.pivot) document.getElementById('pivotBadge').textContent = `⇢ Dịch qua tiếng Anh: ${srcLabel} → EN → ${tgtLabel}`;
-                setStatus(`Dịch xong · ${route}`, true);
+                outEl.textContent = outputText;
+                document.getElementById('btnCp').disabled = false;
+
+                const srcLang = LANGS.find(l => l.code === data.detected_src);
+                if (srcLang) {
+                    document.getElementById('detectedName').textContent = srcLang.name;
+                    document.getElementById('detectedFlag').textContent = srcLang.flag;
+                }
+
+                document.getElementById('pivotBadge').style.display = 'none';
+
+                setStatus('Dịch xong', true);
+
             } catch (e) {
                 outEl.classList.remove('typing');
-                clearOutput();
+                outEl.innerHTML = '<span class="out-ph">Bản dịch sẽ xuất hiện ở đây…</span>';
+                outputText = '';
+                document.getElementById('btnCp').disabled = true;
                 showErr(e.message);
                 setStatus('Thất bại', false);
             } finally {
                 busy = false;
                 setLoading(false);
-                checkPair();
+                document.getElementById('btnGo').disabled = !document.getElementById('inputText').value.trim();
             }
-        }
-
-        function showOutput(text) {
-            const el = document.getElementById('outBody');
-            el.textContent = text;
-            document.getElementById('btnCopy').disabled = false;
-        }
-
-        function clearOutput() {
-            document.getElementById('outBody').innerHTML = '<span class="out-placeholder">Bản dịch sẽ xuất hiện ở đây…</span>';
-            document.getElementById('btnCopy').disabled = true;
-            outputText = '';
         }
 
         async function doCopy() {
             if (!outputText) return;
             await navigator.clipboard.writeText(outputText);
-            const btn = document.getElementById('btnCopy');
+            const btn = document.getElementById('btnCp');
             btn.textContent = '✓ Đã sao chép'; btn.classList.add('done');
             setTimeout(() => { btn.textContent = 'Sao chép'; btn.classList.remove('done'); }, 2000);
         }
 
-        /* ── UI helpers ──────────────────────────────────────────────────────────── */
         function setLoading(on) {
             const pw = document.getElementById('progWrap');
             const pb = document.getElementById('progBar');
-            const btn = document.getElementById('btnTranslate');
+            const btn = document.getElementById('btnGo');
             pw.style.display = on ? 'block' : 'none';
-            pb.classList.toggle('running', on);
+            pb.classList.toggle('run', on);
             btn.disabled = on;
             btn.textContent = on ? '⏳ Đang xử lý…' : '✦  Dịch  ·  Ctrl+Enter';
         }
 
         function setStatus(msg, ok) {
-            document.getElementById('statusMsg').textContent = msg;
-            document.getElementById('statusDot').style.background = ok ? 'var(--jade)' : 'var(--red)';
-            document.getElementById('statusDot').style.boxShadow = ok ? '0 0 8px var(--jade)' : '0 0 8px var(--red)';
+            document.getElementById('ftMsg').textContent = msg;
+            const dot = document.getElementById('ftDot');
+            dot.style.background = ok ? 'var(--jade)' : 'var(--red)';
+            dot.style.boxShadow = ok ? '0 0 8px var(--jade)' : '0 0 8px var(--red)';
         }
 
-        function showErr(msg) {
-            const el = document.getElementById('errBox');
-            el.textContent = '⚠  ' + msg; el.classList.add('show');
-        }
+        function showErr(msg) { const e = document.getElementById('errBox'); e.textContent = '⚠  ' + msg; e.classList.add('show'); }
         function hideErr() { document.getElementById('errBox').classList.remove('show'); }
 
         document.addEventListener('click', e => {
-            if (!e.target.closest('#langPopup') && !e.target.closest('#tgtHalf')) {
-                closePopup();
-            }
+            if (!e.target.closest('#langPopup') && !e.target.closest('#tgtSide')) closePopup();
         });
-
-        // Close popup on outside scroll only
         window.addEventListener('scroll', e => {
-            if (!e.target.closest('#langPopup')) closePopup();
+            if (e.target !== document.getElementById('popupList')) closePopup();
         }, true);
         window.addEventListener('resize', closePopup);
 

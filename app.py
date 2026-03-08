@@ -1,9 +1,3 @@
-"""
-Translation API - MarianMT only
-Chạy: uvicorn app:app --reload --port 8000
-pip install langdetect
-"""
-
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -15,7 +9,7 @@ import torch
 import logging
 import os
 
-DetectorFactory.seed = 0  # kết quả ổn định
+DetectorFactory.seed = 0
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -28,7 +22,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ─── Cặp ngôn ngữ hỗ trợ ──────────────────────────────────────────────────────
 LANGUAGE_PAIRS = {
     ("en", "vi"): "Helsinki-NLP/opus-mt-en-vi",
     ("vi", "en"): "Helsinki-NLP/opus-mt-vi-en",
@@ -55,11 +48,10 @@ LANGUAGE_PAIRS = {
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 logger.info(f"Device: {DEVICE}")
 
-_cache: dict = {}  # (src, tgt) -> (model, tokenizer)
+_cache: dict = {} 
 
 
 def _load_model(src: str, tgt: str):
-    """Load và cache model MarianMT cho cặp (src, tgt)."""
     key = (src, tgt)
     if key in _cache:
         return _cache[key]
@@ -79,7 +71,6 @@ def _load_model(src: str, tgt: str):
 
 
 def _run_model(text: str, src: str, tgt: str) -> str:
-    """Dịch trực tiếp một cặp đã có trong LANGUAGE_PAIRS."""
     model, tok = _load_model(src, tgt)
     inputs = tok(text, return_tensors="pt",
                  padding=True, truncation=True, max_length=512).to(DEVICE)
@@ -89,19 +80,12 @@ def _run_model(text: str, src: str, tgt: str) -> str:
 
 
 def translate_with_pivot(text: str, src: str, tgt: str) -> tuple[str, bool]:
-    """
-    Dịch văn bản. Nếu cặp (src, tgt) không có model trực tiếp,
-    tự động pivot qua tiếng Anh: src→en→tgt.
-    Trả về (bản_dịch, is_pivot).
-    """
     if src == tgt:
         return text, False
 
-    # Có model trực tiếp
     if (src, tgt) in LANGUAGE_PAIRS:
         return _run_model(text, src, tgt), False
 
-    # Pivot qua English
     pivot_ok = (src, "en") in LANGUAGE_PAIRS and ("en", tgt) in LANGUAGE_PAIRS
     if pivot_ok:
         logger.info(f"Pivot: {src}→en→{tgt}")
@@ -109,17 +93,15 @@ def translate_with_pivot(text: str, src: str, tgt: str) -> tuple[str, bool]:
         result  = _run_model(en_text, "en", tgt)
         return result, True
 
-    # Không có đường nào
     supported = ", ".join(f"{s}→{t}" for s, t in LANGUAGE_PAIRS)
     raise HTTPException(400, f"Không hỗ trợ '{src}'→'{tgt}' (kể cả qua pivot). Hỗ trợ: {supported}")
 
 
 class TranslateRequest(BaseModel):
     text: str
-    src_lang: str   # "auto" hoặc mã ngôn ngữ cụ thể
+    src_lang: str
     tgt_lang: str
 
-# Map langdetect code -> mã nội bộ (một số khác nhau)
 LANG_MAP = {
     "zh-cn": "zh", "zh-tw": "zh",
     "ja": "ja", "ko": "ko",
@@ -133,9 +115,13 @@ SUPPORTED_DETECT = set(LANG_MAP.values())
 
 
 def detect_language(text: str) -> str:
+    if len(text.strip()) < 10:
+        return "en"
     try:
         raw = detect(text)
-        return LANG_MAP.get(raw, raw)
+        mapped = LANG_MAP.get(raw, raw)
+        all_langs = set(l for pair in LANGUAGE_PAIRS for l in pair)
+        return mapped if mapped in all_langs else "en"
     except LangDetectException:
         return "en"
 
@@ -151,7 +137,6 @@ def health():
 
 @app.get("/api/pairs")
 def pairs():
-    """Trả về tất cả cặp có thể dịch (trực tiếp + pivot qua EN)."""
     direct = set(LANGUAGE_PAIRS.keys())
     all_langs = set(l for pair in LANGUAGE_PAIRS for l in pair)
     result = []
@@ -171,7 +156,6 @@ def translate(req: TranslateRequest):
     if not req.text.strip():
         raise HTTPException(400, "Văn bản trống")
 
-    # Auto detect
     src = detect_language(req.text.strip()) if req.src_lang == "auto" else req.src_lang
 
     if src == req.tgt_lang:
